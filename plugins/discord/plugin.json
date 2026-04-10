@@ -2,5 +2,5 @@
   "id": "discord",
   "name": "Discord",
   "priority": 10,
-  "description": "Adds a Discord authentication provider."
+  "description": "Adds a Discord authentication provider and channel notifications for collections."
 }

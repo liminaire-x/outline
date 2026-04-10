@@ -141,6 +141,7 @@ export enum IntegrationType {
 
 export enum IntegrationService {
   Diagrams = "diagrams",
+  Discord = "discord",
   Grist = "grist",
   Slack = "slack",
   GoogleAnalytics = "google-analytics",
@@ -253,7 +254,7 @@ export type IntegrationSettings<T> = T extends IntegrationType.Embed
   : T extends IntegrationType.Analytics
     ? { measurementId: string; instanceUrl?: string; scriptName?: string }
     : T extends IntegrationType.Post
-      ? { url: string; channel: string; channelId: string }
+      ? { url: string; channel?: string; channelId?: string }
       : T extends IntegrationType.Command
         ? { serviceTeamId: string }
         : T extends IntegrationType.Import
