@@ -2,7 +2,8 @@
 /* oxlint-disable @typescript-oxlint/no-var-requires */
 /* oxlint-disable no-undef */
 const { exec } = require("child_process");
-const { readdirSync, existsSync } = require("fs");
+const { readdirSync, existsSync, rmSync, mkdirSync, copyFileSync } =
+  require("fs");
 
 const getDirectories = (source) =>
   readdirSync(source, { withFileTypes: true })
@@ -30,10 +31,8 @@ async function build() {
   // Clean previous build
   console.log("Clean previous build…");
 
-  await Promise.all([
-    execAsync("rm -rf ./build/server"),
-    execAsync("rm -rf ./build/plugins"),
-  ]);
+  rmSync("./build/server", { recursive: true, force: true });
+  rmSync("./build/plugins", { recursive: true, force: true });
 
   const d = getDirectories("./plugins");
 
@@ -68,23 +67,33 @@ async function build() {
 
   // Copy static files
   console.log("Copying static files…");
-  await Promise.all([
-    execAsync(
-      "cp ./server/collaboration/Procfile ./build/server/collaboration/Procfile"
-    ),
-    execAsync(
-      "cp ./server/static/error.dev.html ./build/server/error.dev.html"
-    ),
-    execAsync(
-      "cp ./server/static/error.prod.html ./build/server/error.prod.html"
-    ),
-    execAsync("cp package.json ./build"),
-    ...d.map(async (plugin) =>
-      execAsync(
-        `mkdir -p ./build/plugins/${plugin} && cp ./plugins/${plugin}/plugin.json ./build/plugins/${plugin}/plugin.json 2>/dev/null || :`
-      )
-    ),
-  ]);
+
+  mkdirSync("./build/server/collaboration", { recursive: true });
+  copyFileSync(
+    "./server/collaboration/Procfile",
+    "./build/server/collaboration/Procfile"
+  );
+  copyFileSync(
+    "./server/static/error.dev.html",
+    "./build/server/error.dev.html"
+  );
+  copyFileSync(
+    "./server/static/error.prod.html",
+    "./build/server/error.prod.html"
+  );
+  copyFileSync("./package.json", "./build/package.json");
+
+  for (const plugin of d) {
+    mkdirSync(`./build/plugins/${plugin}`, { recursive: true });
+    try {
+      copyFileSync(
+        `./plugins/${plugin}/plugin.json`,
+        `./build/plugins/${plugin}/plugin.json`
+      );
+    } catch {
+      // plugin.json이 없는 플러그인은 무시
+    }
+  }
 
   console.log("Done!");
 }
