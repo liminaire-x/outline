@@ -91,7 +91,7 @@ async function build() {
         `./build/plugins/${plugin}/plugin.json`
       );
     } catch {
-      // plugin.json이 없는 플러그인은 무시
+      // plugin.json
     }
   }
 
